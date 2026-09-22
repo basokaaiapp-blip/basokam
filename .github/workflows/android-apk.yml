@@ -51,9 +51,9 @@ jobs:
           fi
 
           # Restore debug.keystore if base64 file exists
-          if [ ! -f "debug.keystore" ] && [ -f "debug.keystore.base64" ]; then
+          if [ -f "debug.keystore.base64" ]; then
             echo "Restoring debug.keystore from debug.keystore.base64..."
-            base64 -d debug.keystore.base64 > debug.keystore || true
+            base64 -d debug.keystore.base64 > debug.keystore 2>/dev/null || base64 -D debug.keystore.base64 > debug.keystore 2>/dev/null || true
           fi
 
       - name: Ensure gradlew executable
@@ -71,22 +71,25 @@ jobs:
       - name: Locate and Verify APK
         id: find-apk
         run: |
-          APK_PATH=$(find app/build/outputs/apk/debug/ -type f -name "*debug.apk" 2>/dev/null | head -n 1)
-          if [ -z "$APK_PATH" ]; then
-            APK_PATH=$(find . -type f -name "*debug.apk" | head -n 1)
+          RAW_APK=$(find app/build/outputs/apk/debug/ -type f -name "*debug.apk" 2>/dev/null | head -n 1)
+          if [ -z "$RAW_APK" ]; then
+            RAW_APK=$(find . -type f -name "*debug.apk" | head -n 1)
           fi
-          if [ -z "$APK_PATH" ]; then
+          if [ -z "$RAW_APK" ]; then
             echo "ERROR: No debug APK was found in build outputs!"
             exit 1
           fi
-          echo "Found APK: $APK_PATH"
-          echo "apk_path=$APK_PATH" >> $GITHUB_OUTPUT
-          ls -lh "$APK_PATH"
+          mkdir -p build-output
+          cp "$RAW_APK" build-output/Basoka-AI.apk
+          echo "Found APK: $RAW_APK"
+          echo "Prepared APK: build-output/Basoka-AI.apk"
+          echo "apk_path=build-output/Basoka-AI.apk" >> $GITHUB_OUTPUT
+          ls -lh build-output/Basoka-AI.apk
 
       - name: Upload Basoka AI APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Basoka-AI-APK
-          path: ${{ steps.find-apk.outputs.apk_path }}
+          path: build-output/Basoka-AI.apk
           if-no-files-found: error
           retention-days: 30
