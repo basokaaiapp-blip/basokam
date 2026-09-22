@@ -27,24 +27,30 @@ jobs:
           java-version: '17'
           cache: 'gradle'
 
-      - name: Configure Android SDK & Accept Licenses
+      - name: Setup Android SDK Environment & local.properties
         run: |
-          # Use pre-installed Android SDK on GitHub-hosted runner ($ANDROID_HOME)
-          export ANDROID_HOME="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
-          export ANDROID_SDK_ROOT="$ANDROID_HOME"
-          echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
-          echo "ANDROID_SDK_ROOT=$ANDROID_HOME" >> $GITHUB_ENV
-          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_PATH
-          echo "$ANDROID_HOME/platform-tools" >> $GITHUB_PATH
+          SDK_PATH="${ANDROID_HOME:-/usr/local/lib/android/sdk}"
+          echo "sdk.dir=$SDK_PATH" > local.properties
+          echo "ANDROID_HOME=$SDK_PATH" >> $GITHUB_ENV
+          echo "ANDROID_SDK_ROOT=$SDK_PATH" >> $GITHUB_ENV
+          echo "$SDK_PATH/cmdline-tools/latest/bin" >> $GITHUB_PATH
+          echo "$SDK_PATH/platform-tools" >> $GITHUB_PATH
 
-          # Automatically accept all Android SDK licenses
-          yes | sdkmanager --licenses > /dev/null 2>&1 || true
+          # Accept SDK licenses
+          yes | "$SDK_PATH/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null 2>&1 || true
 
-          # Install/verify required platforms and build-tools for compileSdk 36 (Android 15+)
-          sdkmanager "platforms;android-36" "build-tools;36.0.0" > /dev/null 2>&1 || true
-
-      - name: Restore debug.keystore if needed
+      - name: Prepare build environment files (.env and debug.keystore)
         run: |
+          # Secrets Gradle Plugin expects .env to exist
+          if [ ! -f ".env" ]; then
+            if [ -f ".env.example" ]; then
+              cp .env.example .env
+            else
+              echo "GEMINI_API_KEY=MY_GEMINI_API_KEY" > .env
+            fi
+          fi
+
+          # Restore debug.keystore if base64 file exists
           if [ ! -f "debug.keystore" ] && [ -f "debug.keystore.base64" ]; then
             echo "Restoring debug.keystore from debug.keystore.base64..."
             base64 -d debug.keystore.base64 > debug.keystore
@@ -60,12 +66,15 @@ jobs:
           ./gradlew --version
 
       - name: Build Debug APK
-        run: ./gradlew assembleDebug --stacktrace
+        run: ./gradlew assembleDebug --stacktrace --no-daemon
 
       - name: Locate and Verify APK
         id: find-apk
         run: |
-          APK_PATH=$(find . -type f -name "*debug.apk" | head -n 1)
+          APK_PATH=$(find app/build/outputs/apk/debug/ -type f -name "*debug.apk" 2>/dev/null | head -n 1)
+          if [ -z "$APK_PATH" ]; then
+            APK_PATH=$(find . -type f -name "*debug.apk" | head -n 1)
+          fi
           if [ -z "$APK_PATH" ]; then
             echo "ERROR: No debug APK was found in build outputs!"
             exit 1
