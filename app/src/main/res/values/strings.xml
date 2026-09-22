@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">Basoka AI</string>
+    <string name="nav_home">سەرەکی</string>
+    <string name="nav_chat">گفتوگۆ</string>
+    <string name="nav_tools">ئامرازەکان</string>
+    <string name="nav_history">مێژوو</string>
+    <string name="nav_settings">ڕێکخستن</string>
+    
+    <string name="welcome_greeting">سڵاو 👋</string>
+    <string name="welcome_subtitle">Basoka AI ئامادەیە بۆ یارمەتیدانت بە چەندین مۆدێلی زیرەک.</string>
+    <string name="prompt_placeholder">چی دەتەوێت بکەم؟</string>
+    <string name="auto_mode">خۆکار</string>
+    <string name="status_connected">چالاک</string>
+    <string name="status_disconnected">ناچالاک</string>
+    <string name="status_limited">سنووردار</string>
+    
+    <string name="btn_send">ناردن</string>
+    <string name="btn_retry">دوبارە هەوڵبدە</string>
+    <string name="btn_choose_free">Model ـێکی خۆڕایی هەڵبژێرە</string>
+    <string name="btn_continue">بەردەوام بە</string>
+    <string name="btn_cancel">پاشگەزبوونەوە</string>
+    <string name="thinking">Basoka AI بیر دەکاتەوە...</string>
+</resources>

@@ -1,0 +1,6 @@
+{
+  "name": "Basoka AI",
+  "description": "پلاتفۆرمی پێشکەوتووی فرە-AI بە زمانی کوردی سۆرانی بۆ وتووێژ، وێنە، دەنگ، کۆد و ئامرازە زیرەکەکان",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

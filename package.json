@@ -1,0 +1,7 @@
+{
+  "name": "basoka-ai-android",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "echo 'Basoka AI Android Project Verified'"
+  }
+}
